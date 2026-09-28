@@ -1,6 +1,6 @@
 ---
 name: using-bee
-description: Operates Nulab Backlog (バックログ) through the bee CLI. It covers issues (課題), comments (コメント), pull requests (プルリクエスト), wikis, documents (ドキュメント), projects, milestones, notifications, stars, watches, and any other Backlog API endpoint. Use this skill whenever a task touches Backlog, even if the user does not mention bee. Signs include an issue key like PROJ-123, a *.backlog.com or *.backlog.jp URL, or a request to read, create, update, comment on, or report on Backlog data. It also decides which text format (Markdown or Backlog notation) to use before posting any description, comment, wiki page, or pull request body. Not for the general Scrum term "product backlog", or for other trackers such as Jira or GitHub Issues.
+description: Operates Nulab Backlog (バックログ) through the bee CLI. It covers issues (課題), comments (コメント), mentions (メンション), pull requests (プルリクエスト), wikis, documents (ドキュメント), projects, milestones, notifications, stars, watches, and any other Backlog API endpoint. Use this skill whenever a task touches Backlog, even if the user does not mention bee. Signs include an issue key like PROJ-123, a *.backlog.com or *.backlog.jp URL, or a request to read, create, update, comment on, or report on Backlog data. It also decides which text format (Markdown or Backlog notation) to use before posting any description, comment, wiki page, or pull request body. Not for the general Scrum term "product backlog", or for other trackers such as Jira or GitHub Issues.
 ---
 
 # using-bee
@@ -89,6 +89,16 @@ Find the project's rule in this order. Stop when one step gives the answer:
 If you cannot run the check, for example because the project key is unknown, ask the user. Do not guess from existing issue text. Someone may have posted that text in the wrong format.
 
 For Backlog notation, follow the `backlog-notation` skill. If it is not installed, fetch https://raw.githubusercontent.com/nulab/bee/main/skills/backlog-notation/SKILL.md. For Markdown, use plain GitHub Flavored Markdown.
+
+### Mentions
+
+A mention uses `<@U` + the user's numeric ID + `>`. For example, `<@U12345>`. The syntax is the same in Markdown and Backlog notation. Plain `@Name` is only text. It does not notify anyone.
+
+- Get the numeric ID with `bee project users -p PROJECT_KEY --json id,name`. Only project members get notifications. A mention of anyone else shows the name but sends no notification. For your own ID, use `bee user me --json id`.
+- `<@T` + team ID + `>` is for a team. `<@project>` is for every project member. Get team IDs with `bee team list --json id,name`. Use these only when the user asks, because they can notify many people at once.
+- Issue comments notify the mentioned member. Issue descriptions accept the same syntax. Pull requests and wiki pages are not confirmed, so when a notification matters there, also pass `--notify`. Mentions do not work in documents: a document body created through the API shows `<@U…>` as plain text, and the API has no endpoint for posting document comments.
+- Backlog returns saved mentions as plain `@Name`. Before you send that text back, look up each named user with `bee project users` and write the mention as `<@U…>` again. Otherwise it stays plain text and notifies no one.
+- To notify someone without mentioning them in the text, pass `--notify <id>` (repeat it for each user) to `bee issue create`, `edit`, `comment`, `close`, `reopen`, or `bee pr create`, `edit`, `comment`.
 
 ## Key Patterns
 

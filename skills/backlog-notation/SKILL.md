@@ -30,28 +30,29 @@ Backlog notation is **not Markdown**. Do not mix the two formats in the same tex
 
 ## Quick Reference
 
-| Feature            | Syntax                                                |
-| ------------------ | ----------------------------------------------------- |
-| Heading            | `* H1` / `** H2` / `*** H3` / `**** H4`               |
-| Bold               | `''text''`                                            |
-| Italic             | `'''text'''`                                          |
-| Strikethrough      | `%%text%%`                                            |
-| Color              | `&color(red) { text }`                                |
-| Color + background | `&color(#fff, #333) { text }`                         |
-| Bullet list        | `- item` (use `--` for nested items)                  |
-| Numbered list      | `+ item` (use `++` for nested items)                  |
-| Checklist          | `- [ ] todo` / `- [x] done` (issue descriptions only) |
-| Link               | `[[https://example.com]]`                             |
-| Labeled link       | `[[label>https://example.com]]`                       |
-| Issue link         | `PROJECT-123` (linked automatically)                  |
-| Quote              | `> text` or `{quote}...{/quote}`                      |
-| Code block         | `{code}...{/code}`                                    |
-| Code with language | `{code:java}...{/code}`                               |
-| Image              | `#image(URL or filename)`                             |
-| Thumbnail          | `#thumbnail(URL or filename)` (< 200KB)               |
-| Table of contents  | `#contents`                                           |
-| Line break         | `&br;`                                                |
-| Escape             | Put `\` before special characters                     |
+| Feature            | Syntax                                                                    |
+| ------------------ | ------------------------------------------------------------------------- |
+| Heading            | `* H1` / `** H2` / `*** H3` / `**** H4`                                   |
+| Bold               | `''text''`                                                                |
+| Italic             | `'''text'''`                                                              |
+| Strikethrough      | `%%text%%`                                                                |
+| Color              | `&color(red) { text }`                                                    |
+| Color + background | `&color(#fff, #333) { text }`                                             |
+| Bullet list        | `- item` (use `--` for nested items)                                      |
+| Numbered list      | `+ item` (use `++` for nested items)                                      |
+| Checklist          | `- [ ] todo` / `- [x] done` (issue descriptions only)                     |
+| Link               | `[[https://example.com]]`                                                 |
+| Labeled link       | `[[label>https://example.com]]`                                           |
+| Issue link         | `PROJECT-123` (linked automatically)                                      |
+| Mention            | `<@U12345>` (numeric user ID, same as in Markdown; `@Name` is plain text) |
+| Quote              | `> text` or `{quote}...{/quote}`                                          |
+| Code block         | `{code}...{/code}`                                                        |
+| Code with language | `{code:java}...{/code}`                                                   |
+| Image              | `#image(URL or filename)`                                                 |
+| Thumbnail          | `#thumbnail(URL or filename)` (< 200KB)                                   |
+| Table of contents  | `#contents`                                                               |
+| Line break         | `&br;`                                                                    |
+| Escape             | Put `\` before special characters                                         |
 
 ## Tables
 
