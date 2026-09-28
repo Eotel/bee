@@ -7,55 +7,76 @@ import {
   setupCommandTest,
 } from "@repo/test-utils";
 
+const ISSUE_IDS: Record<string, number> = { "PROJ-1": 100, "PROJ-2": 200, "PROJ-3": 300 };
+const ISSUE_KEYS: Record<number, string> = { 100: "PROJ-1", 200: "PROJ-2", 300: "PROJ-3" };
+
 const { mockClient, host } = setupCommandTest({
-  getIssue: vi.fn().mockResolvedValue({ id: 200, issueKey: "PROJ-2" }),
-  addRelatedIssue: vi.fn().mockResolvedValue({ id: 100, issueKey: "PROJ-1" }),
+  addRelatedIssue: vi.fn((_issue: string, { targetIssueId }: { targetIssueId: number }) =>
+    Promise.resolve({ id: targetIssueId, issueKey: ISSUE_KEYS[targetIssueId], type: "RELATES" }),
+  ),
 });
+const { resolveIssueId } = vi.hoisted(() => ({ resolveIssueId: vi.fn() }));
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
   ...mockGetClient(mockClient, host),
+  resolveIssueId,
 }));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
+const resolveFromTable = () => {
+  resolveIssueId.mockImplementation((_client: unknown, value: string) =>
+    ISSUE_IDS[value] === undefined
+      ? Promise.reject(new Error(`No such issue: ${value}`))
+      : Promise.resolve(ISSUE_IDS[value]),
+  );
+};
+
 describe("issue add-related", () => {
-  it("resolves each target issue key to its ID before calling the API", async () => {
-    await parseCommand(() => import("./add-related"), ["PROJ-1", "PROJ-2"]);
+  it("relates every target by its resolved issue ID", async () => {
+    resolveFromTable();
 
-    expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-2");
-    expect(mockClient.addRelatedIssue).toHaveBeenCalledWith("PROJ-1", { targetIssueId: 200 });
+    await parseCommand(() => import("./add-related"), ["PROJ-1", "PROJ-2", "PROJ-3"]);
+
+    expect(mockClient.addRelatedIssue).toHaveBeenNthCalledWith(1, "PROJ-1", { targetIssueId: 200 });
+    expect(mockClient.addRelatedIssue).toHaveBeenNthCalledWith(2, "PROJ-1", { targetIssueId: 300 });
   });
 
-  it("uses numeric target IDs without looking them up", async () => {
-    await parseCommand(() => import("./add-related"), ["PROJ-1", "5"]);
+  it("reports each relation with the key of the related issue", async () => {
+    resolveFromTable();
 
-    expect(mockClient.getIssue).not.toHaveBeenCalled();
-    expect(mockClient.addRelatedIssue).toHaveBeenCalledWith("PROJ-1", { targetIssueId: 5 });
-  });
+    await parseCommand(() => import("./add-related"), ["PROJ-1", "PROJ-2", "PROJ-3"]);
 
-  it("reports each target as it is processed", async () => {
-    await parseCommand(() => import("./add-related"), ["PROJ-1", "PROJ-2", "5"]);
-
-    expect(mockClient.addRelatedIssue).toHaveBeenCalledTimes(2);
     expect(consola.success).toHaveBeenNthCalledWith(1, "Added related issue PROJ-2 to PROJ-1");
-    expect(consola.success).toHaveBeenNthCalledWith(2, "Added related issue 5 to PROJ-1");
+    expect(consola.success).toHaveBeenNthCalledWith(2, "Added related issue PROJ-3 to PROJ-1");
   });
 
-  it("stops at a target that fails after reporting the ones already processed", async () => {
-    mockClient.getIssue.mockRejectedValueOnce(new Error("No issue"));
+  it("changes no relation when a target cannot be resolved", async () => {
+    resolveFromTable();
 
     await expect(
-      parseCommand(() => import("./add-related"), ["PROJ-1", "5", "PROJ-404"]),
-    ).rejects.toThrow("No issue");
+      parseCommand(() => import("./add-related"), ["PROJ-1", "PROJ-2", "PROJ-404"]),
+    ).rejects.toThrow("No such issue: PROJ-404");
 
-    expect(consola.success).toHaveBeenCalledTimes(1);
-    expect(consola.success).toHaveBeenCalledWith("Added related issue 5 to PROJ-1");
+    expect(mockClient.addRelatedIssue).not.toHaveBeenCalled();
   });
 
-  it("outputs the API responses as JSON without success messages when --json flag is set", async () => {
+  it("rejects relating an issue to itself before changing any relation", async () => {
+    resolveFromTable();
+
+    await expect(
+      parseCommand(() => import("./add-related"), ["PROJ-1", "PROJ-2", "PROJ-1"]),
+    ).rejects.toThrow('Cannot relate "PROJ-1" to itself.');
+
+    expect(mockClient.addRelatedIssue).not.toHaveBeenCalled();
+  });
+
+  it("outputs the related issues as JSON without success messages when --json flag is set", async () => {
+    resolveFromTable();
+
     await expectStdoutContaining(
       () => parseCommand(() => import("./add-related"), ["PROJ-1", "PROJ-2", "--json"]),
-      "PROJ-1",
+      "PROJ-2",
     );
 
     expect(consola.success).not.toHaveBeenCalled();

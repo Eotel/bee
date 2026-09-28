@@ -19,7 +19,7 @@ const related = new BeeCommand("related")
 
     const issues = await client.getRelatedIssues(issue);
 
-    outputResult(issues, opts as { json?: string }, (data) => {
+    outputResult(issues, opts, (data) => {
       if (data.length === 0) {
         consola.info("No related issues found.");
         return;
@@ -27,7 +27,7 @@ const related = new BeeCommand("related")
 
       const rows: Row[] = data.map((item) => [
         { header: "KEY", value: item.issueKey },
-        { header: "STATUS", value: item.status.name },
+        { header: "STATUS", value: item.status?.name ?? "" },
         { header: "ASSIGNEE", value: item.assignee?.name ?? "Unassigned" },
         { header: "SUMMARY", value: item.summary },
       ]);

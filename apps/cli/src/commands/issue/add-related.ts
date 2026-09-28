@@ -1,12 +1,12 @@
 import { getClient, resolveIssueId } from "@repo/backlog-utils";
-import { outputResult } from "@repo/cli-utils";
+import { UserError, outputResult } from "@repo/cli-utils";
 import consola from "consola";
 import { type Entity } from "backlog-js";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
 const addRelated = new BeeCommand("add-related")
-  .summary("Relate issues to an issue")
+  .summary("Add related issues to an issue")
   .description(
     `Each issue can have up to 50 related issues. Relating an issue that is already related does nothing.`,
   )
@@ -25,16 +25,26 @@ const addRelated = new BeeCommand("add-related")
   .action(async (issue: string, targets: string[], opts) => {
     const { client } = await getClient(opts.space);
 
+    const [issueId, ...targetIds] = await Promise.all(
+      [issue, ...targets].map((value) => resolveIssueId(client, value)),
+    );
+    const selfIndex = targetIds.indexOf(issueId);
+    if (selfIndex !== -1) {
+      throw new UserError(`Cannot relate "${targets[selfIndex]}" to itself.`);
+    }
+
     const results: Entity.Issue.RelatedIssue[] = [];
-    for (const target of targets) {
-      const targetIssueId = await resolveIssueId(client, target);
-      results.push(await client.addRelatedIssue(issue, { targetIssueId }));
+    for (const targetIssueId of targetIds) {
+      const related = await client.addRelatedIssue(issue, { targetIssueId });
+      results.push(related);
+      // Reported per relation rather than in outputResult's formatter, so an
+      // API error part-way through still shows which relations were added.
       if (opts.json === undefined) {
-        consola.success(`Added related issue ${target} to ${issue}`);
+        consola.success(`Added related issue ${related.issueKey} to ${issue}`);
       }
     }
 
-    outputResult(results, opts as { json?: string }, () => {});
+    outputResult(results, opts, () => {});
   });
 
 export default addRelated;
