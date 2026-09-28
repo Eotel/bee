@@ -6,6 +6,9 @@ import * as opt from "../../lib/common-options";
 
 const addTag = new BeeCommand("add-tag")
   .summary("Add tags to a document")
+  .description(
+    `New tag names are created. Tags the document already has are left as they are. With \`--json\`, prints the tags given on the command line.`,
+  )
   .argument("<document>", "Document ID")
   .argument("<tags...>", "Tag names")
   .addOption(opt.json())
@@ -18,9 +21,9 @@ const addTag = new BeeCommand("add-tag")
   .action(async (document: string, tags: string[], opts) => {
     const { client } = await getClient(opts.space);
 
-    const added = await addDocumentTags(client, document, tags);
+    const result = await addDocumentTags(client, document, tags);
 
-    outputResult(added, opts, () => {
+    outputResult(result, opts, () => {
       consola.success(
         `Added ${tags.length === 1 ? "tag" : "tags"} ${tags.join(", ")} to document ${document}`,
       );

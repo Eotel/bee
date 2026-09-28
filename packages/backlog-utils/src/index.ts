@@ -8,7 +8,7 @@ export {
   getDocumentsCount,
   removeDocumentTags,
 } from "./document-api";
-export type { DocumentComment, DocumentCommentReply } from "./document-api";
+export type { DocumentComment, DocumentCommentEntry, DocumentCommentReply } from "./document-api";
 export {
   IssueStatusId,
   PRIORITY_NAMES,

@@ -36,7 +36,7 @@ describe("document add-tag", () => {
   });
 
   it(
-    "outputs the added tags as JSON when --json flag is set",
+    "outputs the tags given on the command line as JSON when --json flag is set",
     itOutputsJson(
       () => import("./add-tag"),
       ["doc-1", "spec", "--json"],

@@ -5,6 +5,7 @@ import * as opt from "../../lib/common-options";
 
 const removeTag = new BeeCommand("remove-tag")
   .summary("Remove tags from a document")
+  .description(`Tags the document does not have are ignored.`)
   .argument("<document>", "Document ID")
   .argument("<tags...>", "Tag names")
   .addOption(opt.space())

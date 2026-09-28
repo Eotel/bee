@@ -21,8 +21,7 @@ const count = new BeeCommand("count")
 
     const result = await getDocumentsCount(client, opts.project);
 
-    const json = opts.json === true ? "" : opts.json;
-    outputResult(result, { json }, (data) => {
+    outputResult(result, opts, (data) => {
       consola.log(String(data.count));
     });
   });

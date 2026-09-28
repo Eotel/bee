@@ -1,13 +1,10 @@
-import { type DocumentCommentReply, getClient, getDocumentComments } from "@repo/backlog-utils";
+import { type DocumentCommentEntry, getClient, getDocumentComments } from "@repo/backlog-utils";
 import { formatDate, outputResult } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
-const printEntry = (
-  entry: DocumentCommentReply | Omit<DocumentCommentReply, "commentId">,
-  indent: string,
-) => {
+const printEntry = (entry: DocumentCommentEntry, indent: string) => {
   consola.log(`${indent}${entry.createdUser?.name ?? "Unknown"} (${formatDate(entry.created)}):`);
   consola.log(
     entry.plain

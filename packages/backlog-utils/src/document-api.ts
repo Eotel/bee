@@ -5,10 +5,9 @@ import { type BacklogClient } from "./client";
 // called through its generic request helpers. Replace each function with the
 // backlog-js method once one exists.
 
-type DocumentCommentReply = {
+type DocumentCommentEntry = {
   id: string;
   documentId: string;
-  commentId: string;
   content: string;
   plain: string;
   createdUserId: number;
@@ -18,7 +17,11 @@ type DocumentCommentReply = {
   createdUser: Entity.User.User | null;
 };
 
-type DocumentComment = Omit<DocumentCommentReply, "commentId"> & {
+type DocumentCommentReply = DocumentCommentEntry & {
+  commentId: string;
+};
+
+type DocumentComment = DocumentCommentEntry & {
   statusId: number;
   commentType: string;
   replies: DocumentCommentReply[];
@@ -47,4 +50,4 @@ const removeDocumentTags = (
 ): Promise<void> => client.delete(`documents/${documentId}/tags`, { tagNames });
 
 export { addDocumentTags, getDocumentComments, getDocumentsCount, removeDocumentTags };
-export type { DocumentComment, DocumentCommentReply };
+export type { DocumentComment, DocumentCommentEntry, DocumentCommentReply };
