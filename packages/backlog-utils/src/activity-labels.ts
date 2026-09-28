@@ -41,6 +41,8 @@ const ACTIVITY_LABELS: Record<number, string> = {
   47: "Issue Multi-Created",
   48: "Document Multi-Created",
   49: "Document Mentioned",
+  50: "Related Issue Added",
+  51: "Related Issue Removed",
 };
 
 export { ACTIVITY_LABELS };
