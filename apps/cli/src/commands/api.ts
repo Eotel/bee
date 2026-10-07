@@ -237,8 +237,6 @@ const makeRequest = async (
     throw new UserError(`Unsupported HTTP method: ${method}`);
   }
 
-  // request() accepts strings and numbers; encode booleans and array elements
-  // as they would be sent in the form body or query string.
   const requestParams: Record<string, string | number | string[]> = {};
   for (const [key, value] of Object.entries(params)) {
     if (Array.isArray(value)) {
