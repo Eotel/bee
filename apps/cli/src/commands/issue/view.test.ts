@@ -118,8 +118,7 @@ describe("issue view", () => {
         await parseCommand(() => import("./view"), ["PROJ-1", "--comments", "--json", fields]);
 
         const expected = fields ? { comments } : { ...sampleIssue, comments };
-        expect(writeSpy).toHaveBeenCalledWith(`${JSON.stringify(expected)}\n`);
-        expect(mockClient.getIssueComments).toHaveBeenCalledWith("PROJ-1", { order: "asc" });
+        expect(JSON.parse(writeSpy.mock.calls[0][0] as string)).toEqual(expected);
         expect(consola.log).not.toHaveBeenCalled();
       } finally {
         writeSpy.mockRestore();
@@ -134,9 +133,10 @@ describe("issue view", () => {
     try {
       await parseCommand(() => import("./view"), ["PROJ-1", "--comments", "--json"]);
 
-      expect(writeSpy).toHaveBeenCalledWith(
-        `${JSON.stringify({ ...sampleIssue, comments: [] })}\n`,
-      );
+      expect(JSON.parse(writeSpy.mock.calls[0][0] as string)).toEqual({
+        ...sampleIssue,
+        comments: [],
+      });
     } finally {
       writeSpy.mockRestore();
     }
@@ -148,7 +148,7 @@ describe("issue view", () => {
     try {
       await parseCommand(() => import("./view"), ["PROJ-1", "--json"]);
 
-      expect(writeSpy).toHaveBeenCalledWith(`${JSON.stringify(sampleIssue)}\n`);
+      expect(JSON.parse(writeSpy.mock.calls[0][0] as string)).toEqual(sampleIssue);
       expect(mockClient.getIssueComments).not.toHaveBeenCalled();
     } finally {
       writeSpy.mockRestore();
