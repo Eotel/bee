@@ -20,7 +20,7 @@ const api = new BeeCommand("api")
 
 If a \`-f\` value starts with \`@\`, the rest of the value is interpreted as a filename to read the value from. Pass \`-\` to read from standard input (e.g. \`-f 'key=@-'\`). File and stdin content is always sent as a string, without type inference.
 
-For GET, fields are query parameters. For POST/PUT/PATCH/DELETE, fields are the request body.
+For GET, fields are query parameters, and a query string in the endpoint (e.g. \`issues?count=5\`) is sent with them. For POST/PUT/PATCH/DELETE, fields are the request body.
 
 JSON responses are formatted as JSON. Other response bodies are written unchanged to standard output. Redirect the output to a file to download attachments. \`--json\` is only supported for JSON responses.`,
   )
@@ -80,9 +80,13 @@ JSON responses are formatted as JSON. Other response bodies are written unchange
     const method = opts.method.toUpperCase();
     const normalizedEndpoint = normalizeEndpoint(endpoint);
 
-    const params = await buildParams(opts.field, opts.rawField);
+    // GET sends params in the URL, so a query string in the endpoint has to join them
+    const { path, query } =
+      method === "GET" ? splitQuery(normalizedEndpoint) : { path: normalizedEndpoint, query: [] };
 
-    const response = await makeRequest(client, method, normalizedEndpoint, params);
+    const params = await buildParams(query, opts.field, opts.rawField);
+
+    const response = await makeRequest(client, method, path, params);
 
     if (opts.silent) {
       await response.body?.cancel();
@@ -123,6 +127,23 @@ const normalizeEndpoint = (endpoint: string): string => {
 };
 
 /**
+ * Split a query string off the endpoint into key/value pairs.
+ * backlog-js appends `?` and the encoded params to the path without looking
+ * for one already there, so `issues?count=2 -f order=desc` was sent as
+ * `issues?count=2?order=desc` and the API read the count as `2?order=desc`.
+ */
+const splitQuery = (endpoint: string): { path: string; query: [string, string][] } => {
+  const index = endpoint.indexOf("?");
+  if (index === -1) {
+    return { path: endpoint, query: [] };
+  }
+  return {
+    path: endpoint.slice(0, index),
+    query: [...new URLSearchParams(endpoint.slice(index + 1))],
+  };
+};
+
+/**
  * Read a field value from a file (`@path`) or stdin (`@-`) reference.
  * The content is sent as-is: no trimming, and no type inference — gh's
  * magicFieldValue does the same. Inferring here would coerce content that
@@ -155,12 +176,16 @@ const readFieldValue = async (ref: string): Promise<string> => {
 };
 
 /**
- * Build params object from --field and --raw-field values.
+ * Build params object from the endpoint's query pairs, --field and --raw-field values.
+ * Query pairs and --raw-field always use literal strings.
  * --field infers types (number, boolean, string) and supports @file references.
- * --raw-field always uses literal strings.
  * When the same key appears multiple times, values are collected into an array.
  */
-const buildParams = async (fields: string[], rawFields: string[]): Promise<Params> => {
+const buildParams = async (
+  query: [string, string][],
+  fields: string[],
+  rawFields: string[],
+): Promise<Params> => {
   const params: Params = {};
 
   const addParam = (rawKey: string, value: ParamValue) => {
@@ -176,6 +201,10 @@ const buildParams = async (fields: string[], rawFields: string[]): Promise<Param
       params[key] = Array.isArray(existing) ? [...existing, value] : [existing, value];
     }
   };
+
+  for (const [key, value] of query) {
+    addParam(key, value);
+  }
 
   for (const pair of fields) {
     const eqIndex = pair.indexOf("=");
