@@ -1,0 +1,66 @@
+name: Fork release
+
+on:
+  push:
+    tags: ["v*-eotel.*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fork-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    if: github.repository == 'Eotel/bee'
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+      pull-requests: write
+
+  publish:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Check release version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          const pkg = JSON.parse(readFileSync('apps/cli/package.json', 'utf8'));
+          assert.match(pkg.version, /^\d+\.\d+\.\d+-eotel\.\d+$/);
+          assert.equal(process.env.RELEASE_TAG, `v${pkg.version}`);
+          JS
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: cli-tarball
+          path: release
+
+      - name: Record artifact checksum and source commit
+        working-directory: release
+        run: |
+          sha256sum ./*.tgz > SHA256SUMS
+          git rev-parse HEAD > SOURCE_COMMIT
+
+      - name: Publish packed CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" release/*.tgz release/SHA256SUMS release/SOURCE_COMMIT \
+            --verify-tag --title "bee ${RELEASE_TAG#v} (Eotel fork)" --notes-from-tag --latest

@@ -1,16 +1,16 @@
 # bee
 
-[![CI](https://img.shields.io/github/actions/workflow/status/nulab/bee/ci.yml?logo=github&label=CI)](https://github.com/nulab/bee/actions/workflows/ci.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/nulab/bee/codeql.yml?logo=github&label=CodeQL)](https://github.com/nulab/bee/actions/workflows/codeql.yml)
-[![npm version](https://img.shields.io/npm/v/@nulab/bee?logo=npm)](https://www.npmjs.com/package/@nulab/bee)
-[![npm last publish](https://img.shields.io/npm/last-update/@nulab/bee?logo=npm&label=last%20publish)](https://www.npmjs.com/package/@nulab/bee)
+[![CI](https://img.shields.io/github/actions/workflow/status/Eotel/bee/ci.yml?logo=github&label=CI)](https://github.com/Eotel/bee/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/Eotel/bee?include_prereleases)](https://github.com/Eotel/bee/releases)
 [![node](https://img.shields.io/badge/node-%3E%3D20.18-brightgreen?logo=nodedotjs)](https://nodejs.org/)
 [![license](https://img.shields.io/github/license/nulab/bee?logo=opensourceinitiative)](LICENSE)
 [![docs](https://img.shields.io/badge/docs-Starlight-purple?logo=astro&logoColor=white)](https://nulab.github.io/bee)
 
 Bring [Backlog](https://backlog.com/) to your command line.
 
-**Looking to install and use bee?** See the [CLI package README](apps/cli/README.md) or the [documentation site](https://nulab.github.io/bee).
+This is Eotel's fork of [nulab/bee](https://github.com/nulab/bee), with fixes used before upstream adoption. Download the packed CLI from [GitHub Releases](https://github.com/Eotel/bee/releases). See [fork distribution](docs/fork.md) for included fixes and release maintenance.
+
+The [upstream documentation](https://nulab.github.io/bee) covers shared commands. Use `bee <command> --help` for the installed fork's flags and behavior.
 
 ## Development
 
@@ -30,7 +30,7 @@ For setup instructions, scripts, and contribution guidelines, see [CONTRIBUTING.
 
 ## Support
 
-Bug reports, feature requests, and questions are handled via [GitHub Issues](https://github.com/nulab/bee/issues/new/choose).
+Report fork-specific problems through [GitHub Issues](https://github.com/Eotel/bee/issues).
 You can write in English or Japanese.
 
 ## License

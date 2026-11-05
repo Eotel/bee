@@ -4,9 +4,7 @@ Bring [Backlog](https://backlog.com/) to your command line.
 
 ## Install
 
-```sh
-npm install -g @nulab/bee
-```
+This package is built from [Eotel/bee](https://github.com/Eotel/bee). Download the built `.tgz` from [GitHub Releases](https://github.com/Eotel/bee/releases), or use a Nix package that pins that release asset. See [fork distribution](https://github.com/Eotel/bee/blob/main/docs/fork.md) for details.
 
 ## Quick Start
 
@@ -26,15 +24,15 @@ bee project list
 
 ## Documentation
 
-See the [documentation site](https://nulab.github.io/bee) for the full command reference and guides.
+Use `bee <command> --help` for this fork's options. The [upstream documentation](https://nulab.github.io/bee) covers shared commands and guides.
 
 ## Development
 
-See the [repository root README](https://github.com/nulab/bee) for development setup and contributing instructions.
+See the [repository root README](https://github.com/Eotel/bee) for development setup and contributing instructions.
 
 ## Support
 
-Bug reports, feature requests, and questions are handled via [GitHub Issues](https://github.com/nulab/bee/issues/new/choose).
+Report fork-specific problems through [GitHub Issues](https://github.com/Eotel/bee/issues).
 You can write in English or Japanese.
 
 ## License

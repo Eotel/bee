@@ -1,6 +1,6 @@
 {
   "name": "@nulab/bee",
-  "version": "0.0.0",
+  "version": "1.1.1-eotel.1",
   "description": "Bring Backlog to your command line",
   "keywords": [
     "backlog",
@@ -8,15 +8,15 @@
     "nulab",
     "project-management"
   ],
-  "homepage": "https://nulab.github.io/bee",
+  "homepage": "https://github.com/Eotel/bee",
   "bugs": {
-    "url": "https://github.com/nulab/bee/issues"
+    "url": "https://github.com/Eotel/bee/issues"
   },
   "license": "MIT",
   "author": "Nulab Inc.",
   "repository": {
     "type": "git",
-    "url": "git://github.com/nulab/bee.git",
+    "url": "git+https://github.com/Eotel/bee.git",
     "directory": "apps/cli"
   },
   "bin": {

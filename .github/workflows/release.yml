@@ -40,12 +40,14 @@ concurrency:
 
 jobs:
   ci:
+    if: github.repository == 'nulab/bee'
     uses: ./.github/workflows/ci.yml
     permissions:
       contents: read
       pull-requests: write
 
   build:
+    if: github.repository == 'nulab/bee'
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.bump_version.outputs.new_tag }}
@@ -106,6 +108,7 @@ jobs:
             apps/cli/package.json
 
   publish:
+    if: github.repository == 'nulab/bee'
     needs: [ci, build]
     runs-on: ubuntu-latest
     environment:

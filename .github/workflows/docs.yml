@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'nulab/bee'
     runs-on: ubuntu-latest
 
     steps:

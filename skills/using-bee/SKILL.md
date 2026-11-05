@@ -51,8 +51,17 @@ Set these environment variables to avoid repeating common flags:
 
 Run `bee --help` and `bee <command> --help` for the flags and arguments of each command.
 
-For the full command reference (all flags, arguments, examples, and environment variables), fetch:
+This skill accompanies Eotel/bee. Use the installed CLI's help for fork-specific
+flags and behavior. The upstream command reference covers shared commands but may
+omit the fork's changes:
 https://nulab.github.io/bee/llms-full.txt
+
+The fork includes comments in `bee issue view --comments --json` and fetches all
+comment pages for `--comments`. To list the newest comments, use
+`bee issue comment PROJECT-123 --list --order desc -L 5`; use `--min-id` and
+`--max-id` for subsequent pages. `bee api` combines GET endpoint query strings
+with fields and writes non-JSON responses unchanged, so attachments can be
+downloaded by redirecting stdout to a file.
 
 ## Non-Interactive Environments
 
@@ -79,7 +88,7 @@ bee issue list -p PROJECT -a @me
 bee project view -p PROJECT_KEY --json textFormattingRule
 ```
 
-If it is `markdown`, write Markdown. If it is `backlog`, follow the `backlog-notation` skill for the syntax (or fetch https://raw.githubusercontent.com/nulab/bee/main/skills/backlog-notation/SKILL.md if the skill is not installed).
+If it is `markdown`, write Markdown. If it is `backlog`, follow the `backlog-notation` skill for the syntax (or fetch https://raw.githubusercontent.com/Eotel/bee/main/skills/backlog-notation/SKILL.md if the skill is not installed).
 
 **`bee api` for uncovered endpoints** — Access any Backlog API endpoint directly:
 

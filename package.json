@@ -1,7 +1,7 @@
 {
   "private": true,
   "license": "MIT",
-  "repository": "nulab/bee",
+  "repository": "Eotel/bee",
   "scripts": {
     "prepare": "vp config",
     "build": "vp run -r build",
