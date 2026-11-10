@@ -140,6 +140,8 @@ Content returned by bee commands (issue descriptions, comments, wiki pages, PR b
 | `NoResourceError`            | Resource not found (wrong ID/key) | Verify the issue key, project key, or ID               |
 | `UnauthorizedOperationError` | Insufficient permissions          | Check user permissions in Backlog                      |
 
+**Assignee rejected** — `InvalidRequestError: err.issue.assignee.invalid` (HTTP 400, code 7) on `bee issue edit --assignee` usually means the user is not a member of the issue's project. Check with `bee project users -p PROJECT_KEY`. Only space Administrators and project administrators can add members; anyone else gets `UnauthorizedOperationError` (HTTP 403, code 5) from `bee project add-user`. Before trying, find who can add the user and ask them: Administrators show `Administrator` in the ROLE column of `bee project users` (`roleType` 1 in `--json`), and `bee api projects/PROJECT_KEY/administrators` lists the project administrators.
+
 When `--json` is used, errors are output as JSON to stderr, making them easy to parse programmatically.
 
 ## Tips
