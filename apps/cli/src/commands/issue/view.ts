@@ -1,6 +1,6 @@
+import { type Entity, getIssue, getIssueComments } from "backlog-js";
 import { type BacklogClient, getClient, issueUrl, openOrPrintUrl } from "@repo/backlog-utils";
 import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
-import { type Entity } from "backlog-js";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -18,7 +18,7 @@ const getAllIssueComments = async (
   const comments: Entity.Issue.Comment[] = [];
   let page: Entity.Issue.Comment[];
   do {
-    page = await client.getIssueComments(issue, {
+    page = await getIssueComments(client, issue, {
       order: "asc",
       count: COMMENTS_PAGE_SIZE,
       minId: comments.at(-1)?.id,
@@ -53,7 +53,7 @@ const view = new BeeCommand("view")
       return;
     }
 
-    const issueData = await client.getIssue(issue);
+    const issueData = await getIssue(client, issue);
 
     const comments = opts.comments ? await getAllIssueComments(client, issue) : [];
 
