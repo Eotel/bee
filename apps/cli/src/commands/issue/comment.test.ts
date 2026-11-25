@@ -128,6 +128,39 @@ describe("issue comment", () => {
     expect(consola.info).toHaveBeenCalledWith("No comments found.");
   });
 
+  it("lists comments when invoked as `comment list <issue>`", async () => {
+    mockClient.getIssueComments.mockResolvedValue([]);
+
+    await parseCommand(
+      () => import("./comment"),
+      ["list", "TEST-1", "--count", "3", "--order", "desc"],
+    );
+
+    expect(mockClient.getIssueComments).toHaveBeenCalledWith("TEST-1", {
+      order: "desc",
+      count: 3,
+      minId: undefined,
+      maxId: undefined,
+    });
+    expect(mockClient.postIssueComments).not.toHaveBeenCalled();
+  });
+
+  it("rejects an extra positional argument without posting", async () => {
+    await expect(
+      parseCommand(() => import("./comment"), ["TEST-1", "extra", "-b", "Hello"]),
+    ).rejects.toThrow('Unexpected argument "extra"');
+
+    expect(mockClient.postIssueComments).not.toHaveBeenCalled();
+  });
+
+  it("rejects `comment list` without an issue instead of posting to issue list", async () => {
+    await expect(parseCommand(() => import("./comment"), ["list", "-b", "Hello"])).rejects.toThrow(
+      "Missing issue",
+    );
+
+    expect(mockClient.postIssueComments).not.toHaveBeenCalled();
+  });
+
   it("edits last comment with --edit-last flag", async () => {
     mockClient.getIssueComments.mockResolvedValue([
       { id: 10, content: "Other", createdUser: { id: 999 } },

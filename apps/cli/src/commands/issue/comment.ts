@@ -14,23 +14,42 @@ import {
   parseArg,
   printTable,
   resolveStdinArg,
+  UserError,
   vInteger,
 } from "@repo/cli-utils";
+import { type Command } from "commander";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
+
+const LIST_ALIAS = "list";
+
+const resolveTarget = (operands: string[]): { issue: string; list: boolean } => {
+  const list = operands[0] === LIST_ALIAS;
+  const [issue, ...extra] = list ? operands.slice(1) : operands;
+  if (issue === undefined) {
+    throw new UserError("Missing issue. Run `bee issue comment list <issue>` to list comments.");
+  }
+  if (extra.length > 0) {
+    throw new UserError(
+      `Unexpected argument "${extra[0]}". Pass one issue ID or issue key, or run \`bee issue comment list <issue>\` to list comments.`,
+    );
+  }
+  return { issue, list };
+};
 
 const comment = new BeeCommand("comment")
   .summary("Add a comment to an issue")
   .description(
     `When input is piped, it is used as the body automatically.
 
-Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operations.
+Use \`--list\` (or \`bee issue comment list <issue>\`), \`--edit-last\`, or \`--delete-last\` for other comment operations.
 
 \`--list\` returns the 20 oldest comments by default. Use \`--order desc\` to list the newest comments first, and \`--min-id\` / \`--max-id\` for cursor-based pagination.`,
   )
   .argument("<issue>", "Issue ID or issue key")
+  .allowExcessArguments()
   .option("-b, --body <text>", "Comment body")
   .addOption(opt.notify())
   .addOption(opt.attachment())
@@ -67,10 +86,11 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
       command: "bee issue comment PROJECT-123 --delete-last --yes",
     },
   ])
-  .action(async (issue, opts) => {
+  .action(async (_issue, opts, cmd: Command) => {
+    const { issue, list } = resolveTarget(cmd.args);
     const { client } = await getClient(opts.space);
 
-    if (opts.list) {
+    if (list || opts.list) {
       const comments = await getIssueComments(client, issue, {
         minId: parseArg(v.optional(vInteger), opts.minId, "--min-id"),
         maxId: parseArg(v.optional(vInteger), opts.maxId, "--max-id"),
