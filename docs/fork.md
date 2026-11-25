@@ -15,6 +15,9 @@ release workflow publishes only to GitHub Releases.
   with `issue view --comments`; select comment pages with `issue comment --list`.
 - [Endpoint query strings](https://github.com/nulab/bee/pull/189): combine a GET
   endpoint's query string with `-f` and `-F` fields.
+- [Comment list form](https://github.com/Eotel/bee/pull/2): treat
+  `issue comment list <issue>` as `--list`, and stop before posting when the issue
+  is missing or an extra positional argument is given.
 
 Use the installed CLI's `--help` for fork-specific options. The upstream reference
 may omit these changes. Both skills in `skills/` are distributed from the same
