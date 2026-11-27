@@ -57,9 +57,11 @@ omit the fork's changes:
 https://nulab.github.io/bee/llms-full.txt
 
 The fork includes comments in `bee issue view --comments --json` and fetches all
-comment pages for `--comments`. To list the newest comments, use
-`bee issue comment PROJECT-123 --list --order desc -L 5`; use `--min-id` and
-`--max-id` for subsequent pages. `bee api` combines GET endpoint query strings
+comment pages for `--comments`. `bee issue comment PROJECT-123 --list` returns the
+20 oldest comments by default and warns on stderr when it leaves comments out. To
+list the newest comments, use `bee issue comment PROJECT-123 --list --order desc -L 5`;
+use `--min-id` and `--max-id` for subsequent pages. `bee pr comments` and
+`bee pr comment --list` page the same way. `bee api` combines GET endpoint query strings
 with fields and writes non-JSON responses unchanged, so attachments can be
 downloaded by redirecting stdout to a file.
 

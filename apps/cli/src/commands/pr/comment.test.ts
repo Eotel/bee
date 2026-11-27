@@ -6,6 +6,7 @@ import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@r
 const { mockClient, host } = setupCommandTest({
   postPullRequestComments: vi.fn(),
   getPullRequestComments: vi.fn(),
+  getPullRequestCommentsCount: vi.fn(),
   patchPullRequestComments: vi.fn(),
 });
 
@@ -19,6 +20,14 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
 
 vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+
+const commentPage = (length: number) =>
+  Array.from({ length }, (_, index) => ({
+    id: index + 1,
+    content: `Comment ${index + 1}`,
+    createdUser: { name: "Alice" },
+    created: "2025-01-01T00:00:00Z",
+  }));
 
 describe("pr comment", () => {
   it("adds a comment to a pull request", async () => {
@@ -104,6 +113,20 @@ describe("pr comment", () => {
       order: "asc",
     });
     expect(printTable).toHaveBeenCalled();
+  });
+
+  it("warns when --list leaves out newer comments", async () => {
+    mockClient.getPullRequestComments.mockResolvedValue(commentPage(20));
+    mockClient.getPullRequestCommentsCount.mockResolvedValue({ count: 26 });
+
+    await parseCommand(
+      () => import("./comment"),
+      ["42", "--project", "TEST", "--repo", "my-repo", "--list"],
+    );
+
+    expect(consola.warn).toHaveBeenCalledWith(
+      "Showing the 20 oldest of 26 comments. Use `--order desc` to list the newest comments first, or `--min-id 20` for the next page.",
+    );
   });
 
   it("shows message when no comments found with --list", async () => {
