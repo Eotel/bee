@@ -18,6 +18,9 @@ release workflow publishes only to GitHub Releases.
 - [Comment list form](https://github.com/Eotel/bee/pull/2): treat
   `issue comment list <issue>` as `--list`, and stop before posting when the issue
   is missing or an extra positional argument is given.
+- [Comment page warning](https://github.com/Eotel/bee/pull/4): warn on stderr when
+  `issue comment --list`, `pr comment --list`, or `pr comments` leaves out comments,
+  and add the paging flags to `pr comment --list`.
 
 Use the installed CLI's `--help` for fork-specific options. The upstream reference
 may omit these changes. Both skills in `skills/` are distributed from the same
