@@ -1,6 +1,7 @@
 import {
   deleteIssueComment,
   getIssueComments,
+  getIssueCommentsCount,
   getMyself,
   patchIssueComment,
   postIssueComments,
@@ -21,6 +22,7 @@ import { type Command } from "commander";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import { type CommentPageQuery, warnIfCommentsLeftOut } from "../../lib/comment-page";
 import * as opt from "../../lib/common-options";
 
 const LIST_ALIAS = "list";
@@ -91,12 +93,13 @@ Use \`--list\` (or \`bee issue comment list <issue>\`), \`--edit-last\`, or \`--
     const { client } = await getClient(opts.space);
 
     if (list || opts.list) {
-      const comments = await getIssueComments(client, issue, {
+      const query: CommentPageQuery = {
         minId: parseArg(v.optional(vInteger), opts.minId, "--min-id"),
         maxId: parseArg(v.optional(vInteger), opts.maxId, "--max-id"),
         count: parseArg(v.optional(vInteger), opts.count, "--count"),
         order: opts.order ?? "asc",
-      });
+      };
+      const comments = await getIssueComments(client, issue, query);
 
       outputResult(comments, opts as { json?: string }, (data) => {
         const filtered = data.filter((c) => c.content);
@@ -114,6 +117,7 @@ Use \`--list\` (or \`bee issue comment list <issue>\`), \`--edit-last\`, or \`--
 
         printTable(rows);
       });
+      await warnIfCommentsLeftOut(comments, query, () => getIssueCommentsCount(client, issue));
       return;
     }
 

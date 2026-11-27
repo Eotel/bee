@@ -1,15 +1,18 @@
-import { getPullRequestComments } from "backlog-js";
+import { getPullRequestComments, getPullRequestCommentsCount } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { formatDate, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
+import { type CommentPageQuery, warnIfCommentsLeftOut } from "../../lib/comment-page";
 import * as opt from "../../lib/common-options";
 import { resolveOptions } from "../../lib/required-option";
 
 const comments = new BeeCommand("comments")
   .summary("List comments on a pull request")
-  .description(`Displays all comments in chronological order.`)
+  .description(
+    `Returns the 20 oldest comments by default. Use \`--order desc\` to list the newest comments first, and \`--min-id\` / \`--max-id\` for cursor-based pagination.`,
+  )
   .argument("<number>", "Pull request number")
   .addOption(opt.project())
   .addOption(opt.repo())
@@ -33,12 +36,19 @@ const comments = new BeeCommand("comments")
 
     const prNumber = parseArg(vInteger, number, "number");
 
-    const prComments = await getPullRequestComments(client, opts.project, opts.repo, prNumber, {
+    const query: CommentPageQuery = {
       minId: parseArg(v.optional(vInteger), opts.minId, "--min-id"),
       maxId: parseArg(v.optional(vInteger), opts.maxId, "--max-id"),
       order: opts.order ?? "asc",
       count: parseArg(v.optional(vInteger), opts.count, "--count"),
-    });
+    };
+    const prComments = await getPullRequestComments(
+      client,
+      opts.project,
+      opts.repo,
+      prNumber,
+      query,
+    );
 
     const json = opts.json === true ? "" : opts.json;
     outputResult(prComments, { json }, (data) => {
@@ -61,6 +71,9 @@ const comments = new BeeCommand("comments")
         consola.log("");
       }
     });
+    await warnIfCommentsLeftOut(prComments, query, () =>
+      getPullRequestCommentsCount(client, opts.project, opts.repo, prNumber),
+    );
   });
 
 export default comments;

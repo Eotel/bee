@@ -6,6 +6,7 @@ import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@r
 const { mockClient, host } = setupCommandTest({
   postIssueComments: vi.fn(),
   getIssueComments: vi.fn(),
+  getIssueCommentsCount: vi.fn(),
   patchIssueComment: vi.fn(),
   deleteIssueComment: vi.fn(),
 });
@@ -21,6 +22,14 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
 
 vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+
+const commentPage = (length: number) =>
+  Array.from({ length }, (_, index) => ({
+    id: index + 1,
+    content: `Comment ${index + 1}`,
+    createdUser: { name: "Alice" },
+    created: "2025-01-01T00:00:00Z",
+  }));
 
 describe("issue comment", () => {
   it("adds a comment to an issue", async () => {
@@ -126,6 +135,26 @@ describe("issue comment", () => {
     await parseCommand(() => import("./comment"), ["TEST-1", "--list"]);
 
     expect(consola.info).toHaveBeenCalledWith("No comments found.");
+  });
+
+  it("warns on stderr when the default page leaves out newer comments", async () => {
+    mockClient.getIssueComments.mockResolvedValue(commentPage(20));
+    mockClient.getIssueCommentsCount.mockResolvedValue({ count: 26 });
+
+    await parseCommand(() => import("./comment"), ["list", "TEST-1", "--json"]);
+
+    expect(consola.warn).toHaveBeenCalledWith(
+      "Showing the 20 oldest of 26 comments. Use `--order desc` to list the newest comments first, or `--min-id 20` for the next page.",
+    );
+  });
+
+  it("does not warn when the page holds every comment", async () => {
+    mockClient.getIssueComments.mockResolvedValue(commentPage(20));
+    mockClient.getIssueCommentsCount.mockResolvedValue({ count: 20 });
+
+    await parseCommand(() => import("./comment"), ["TEST-1", "--list"]);
+
+    expect(consola.warn).not.toHaveBeenCalled();
   });
 
   it("lists comments when invoked as `comment list <issue>`", async () => {

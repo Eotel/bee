@@ -4,6 +4,7 @@ import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getPullRequestComments: vi.fn(),
+  getPullRequestCommentsCount: vi.fn(),
 };
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -28,6 +29,14 @@ const sampleComments = [
   },
 ];
 
+const commentPage = (length: number) =>
+  Array.from({ length }, (_, index) => ({
+    id: index + 1,
+    content: `Comment ${index + 1}`,
+    createdUser: { name: "Alice" },
+    created: "2025-01-01T00:00:00Z",
+  }));
+
 describe("pr comments", () => {
   it("displays pull request comments", async () => {
     mockClient.getPullRequestComments.mockResolvedValue(sampleComments);
@@ -43,6 +52,22 @@ describe("pr comments", () => {
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Looks good!"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Bob"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Please fix the typo"));
+  });
+
+  it("warns with an older-page hint when --order desc leaves out older comments", async () => {
+    mockClient.getPullRequestComments.mockResolvedValue(commentPage(5).toReversed());
+    mockClient.getPullRequestCommentsCount.mockResolvedValue({ count: 8 });
+
+    const { default: comments } = await import("./comments");
+    await comments.parseAsync(
+      ["42", "--project", "PROJ", "--repo", "repo", "--order", "desc", "--count", "5"],
+      { from: "user" },
+    );
+
+    expect(mockClient.getPullRequestCommentsCount).toHaveBeenCalledWith("PROJ", "repo", 42);
+    expect(consola.warn).toHaveBeenCalledWith(
+      "Showing the 5 newest of 8 comments. Use `--max-id 1` to list older comments.",
+    );
   });
 
   it("shows message when no comments found", async () => {
